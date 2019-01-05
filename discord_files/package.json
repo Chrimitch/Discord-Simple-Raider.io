@@ -1,6 +1,6 @@
 {
-  "name": "Simple Raider.io",
-  "version": "0.1",
+  "name": "R.io - Raider.io for Discord",
+  "version": "0.2",
   "description": "A simpler way to view a character's Raider.io Score in Discord without the fluff from other bots.",
   "main": "./main.js",
   "author": "Chris Mitchell",
