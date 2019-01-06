@@ -4,7 +4,7 @@ A Discord Bot made to return the Raider.io Score of a character in a simple, eas
 
 ### Features
 * Responds to user input through the 'r.io' command.
-* Can respond to arguments passed as flags. Flags include: `-br, -mr, -r, -d, -nl, -a`
+* Can respond to arguments passed as flags (below).
 
 ### Commands
 * `-br` Best run for a character in the current season.
