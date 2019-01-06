@@ -3,6 +3,7 @@ var logger  = require('winston');
 var auth    = require('./auth.json');
 var request = require('request');
 
+// Globals.
 var us_servers      = [
   "Aegwynn","Aeriepeak","Agamaggan","Aggramar","Akama","Alexstrasza","Alleria","AltarofStorms","AlteracMountains","Andorhal","Anetheron","Antonidas",
   "Anubarak","Anvilmar","Arathor","Archimonde","Area52","ArgentDawn","Arthas","Arygos","Auchindoun","Azgalor","Azjol-Nerub","Azshara","Azuremyst","Baelgun","Balnazzar",
@@ -45,7 +46,7 @@ var eu_servers      = [
   "Trollbane","Turalyon","TwilightsHammer","TwistingNether","Tyrande","Uldaman","Ulduar","Uldum","UnGoro","Varimathras","Vashj","Veklor","Veknilash","Voljin","Wildhammer",
   "Wrathbringer","Xavius","Ysera","Ysondre","Zenedar","ZirkeldesCenarius","Zuljin","Zuluhed","MarecagedeZangar","Chantseternels"
 ];
-var valid_flags     = ['-br','-mr','-r','-d','-a'];
+var valid_flags     = ['-br','-mr','-r','-d','-nl','-a'];
 var bfa_dungeons    = ['wm','fh','siege','sots','td','ml','undr','kr','tos','ad'];
 var us_server_regex = new RegExp(us_servers.join("|"), "i");
 var eu_server_regex = new RegExp(eu_servers.join("|"), "i");
@@ -74,15 +75,17 @@ bot.on('ready', function (evt)
 bot.on('message', function (user, userID, channelID, message, evt) {
   if (message.substring(0, 5) === 'r.io ') {
     // Initialize variables.
-    var flags   = [];
-    var dungeon = 'def';
+    var flags        = [];    // Flags for passable arguments.
+    var dungeon      = 'def'; // Default value for dungeon.
+    var dungeon_flag = true;  // If the user hasn't done a key for this dungeon in the current season.
+    var disc_message = '';    // Message variable to eventually send to discord.
 
     // Split arguemts on spaces.
     var args       = message.split(' ');
     var character  = args[1];
 
     // Check format of input string. If valid, move on, else return and alert.
-    var char_regex = new RegExp('^(us|eu)\/[a-zA-Z\-\'\u00C9\u00E9]+\/[a-zA-Z\u00DF-\u0111]+$')
+    var char_regex = new RegExp('^(us|eu)\/[a-zA-Z0-9\-\'\u00C9\u00E9]+\/[a-zA-Z\u00DF-\u0111]+$', "i")
     if(!char_regex.test(character)) {
       bot.sendMessage({
         to: channelID,
@@ -97,7 +100,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
     var server     = char_args[1];
     var name       = char_args[2];
 
-    // if args length > 2, get and validate flags (dungeon as well if there).
+    // If args length > 2, get and validate flags (dungeon as well if there).
     if(args.length > 2) {
       for(i=2;i<args.length;i++) {
         if(args[i] === '-d' || args[i] === '-D') {
@@ -131,33 +134,51 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 
         io_promise.then(
           function(result) {
-          io_data = result;
-          console.log(io_data);
+            var io_data = result;
+            // console.log(io_data);
+            disc_message = io_data.name + '\'s overall score is: ' + io_data.mythic_plus_scores.all + '.';
+            if(!flags.includes('-nl')) { disc_message += ' Raider.io: ' + io_data.profile_url;}
+            if(flags.includes('-a')) { disc_message += '\nBest run: ' + io_data.mythic_plus_best_runs[0].dungeon + ' (' + io_data.mythic_plus_best_runs[0].short_name + ') +' + io_data.mythic_plus_best_runs[0].mythic_level + ' with a score of ' + io_data.mythic_plus_best_runs[0].score + '.';
+                                       disc_message += '\nMost Recent run: ' + io_data.mythic_plus_recent_runs[0].dungeon + ' (' + io_data.mythic_plus_recent_runs[0].short_name + ') +' + io_data.mythic_plus_recent_runs[0].mythic_level + ' with a score of ' + io_data.mythic_plus_recent_runs[0].score + '.';
+                                       disc_message += '\nRaid Progression: Uldir: ' + io_data.raid_progression.uldir.normal_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'N, ' + io_data.raid_progression.uldir.heroic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'H, ' + io_data.raid_progression.uldir.mythic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses + 'M.'; }
+            else {
+              if(flags.includes('-br')) { disc_message += '\nBest run: ' + io_data.mythic_plus_best_runs[0].dungeon + ' (' + io_data.mythic_plus_best_runs[0].short_name + ') +' + io_data.mythic_plus_best_runs[0].mythic_level + ' with a score of ' + io_data.mythic_plus_best_runs[0].score + '.'; }
+              if(flags.includes('-mr')) { disc_message += '\nMost Recent run: ' + io_data.mythic_plus_recent_runs[0].dungeon + ' (' + io_data.mythic_plus_recent_runs[0].short_name + ') +' + io_data.mythic_plus_recent_runs[0].mythic_level + ' with a score of ' + io_data.mythic_plus_recent_runs[0].score + '.'; }
+              if(flags.includes('-r'))  { disc_message += '\nRaid Progression: Uldir: ' + io_data.raid_progression.uldir.normal_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'N, ' + io_data.raid_progression.uldir.heroic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'H, ' + io_data.raid_progression.uldir.mythic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses + 'M.'; }
+            }
+            if(flags.includes('-d'))  {
+              // Loop through mythic_plus_best_runs array to find matching dungeon
+              io_data.mythic_plus_best_runs.every( function(el, i) {
+                if(el.short_name === dungeon) { disc_message += '\nBest run for ' + el.dungeon + ' (' + el.short_name + ') +' + el.mythic_level + ' with a score of ' + el.score + '.'; dungeon_flag = false; return false; }
+                else { return true; }
+              });
+              if(dungeon_flag == true) { disc_message += '\n' + io_data.name + ' has not completed a key for this dungeon in the current season.'; }
+            }
 
-          bot.sendMessage({
-            to: channelID,
-            message: `${name}'s overall score is: ${io_data.mythic_plus_scores.all}. Raider.io: https://raider.io/characters/${region}/${server}/${name}`
-          });
-
+            bot.sendMessage({
+              to: channelID,
+              message: disc_message
+            });
         },function(error) {
-          console.log(error);
-
-          bot.sendMessage({
-            to: channelID,
-            message: `Couldn't find that character. Double check spelling.`
-          });
+            console.log(error);
+            disc_message = 'Couldn\'t find that character. Double check spelling.';
+            bot.sendMessage({
+              to: channelID,
+              message: disc_message
+            });
         })
         break;
       case 1:
         bot.sendMessage({
           to: channelID,
-          message: `Server does not match an existing server in that region. Check spelling.`
+          message: 'Server does not match an existing server in that region. Check spelling.'
         });
-        break;
+        break;1
       case -1:
+        disc_message = 'Region does not exist.'
         bot.sendMessage({
           to: channelID,
-          message: `Region does not exist.`
+          message: disc_message
         });
         break;
       default:
@@ -211,7 +232,7 @@ function validate_dungeon(dungeon) {
 
 /*
   Get Raider.io JSON data from Raider.io given a character's region, server, and name.
-  ['-br','-mr','-r','-d','-a']
+  ['-br','-mr','-r','-d','-nl','-a']
 */
 function get_io_info(region, server, name, flags) {
   var address = 'https://raider.io/api/v1/characters/profile?region='+region+'&realm='+server+'&name='+name+'&fields=mythic_plus_scores';
