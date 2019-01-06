@@ -29,19 +29,18 @@ A Discord Bot made to return the Raider.io Score of a character in a simple, eas
 ### Notes
 * A player's best run is considered their highest scoring run.
 * A player's best run for a dungeon is used through the dungeon's the abbreviation from Raider.io (ex. sots or kr; case does not matter).
-* Short names:
-  Dungeon Name         | Short_name
-  ---------------------|------------
-  Atal'dazar           | AD
-  Freehold             | FH
-  King's Rest          | KR
-  The Motherlode!!     | ML
-  Shrine of the Storms | SOTS
-  Siege of Boralus     | SIEGE
-  Temple of Sethraliss | TOS
-  Tol Dagor            | TD
-  The Underrot         | UNDR
-  Waycrest Manor       | WM
+* Dungeon Name         | Short_name
+---------------------|------------
+Atal'dazar           | AD
+Freehold             | FH
+King's Rest          | KR
+The Motherlode!!     | ML
+Shrine of the Storms | SOTS
+Siege of Boralus     | SIEGE
+Temple of Sethraliss | TOS
+Tol Dagor            | TD
+The Underrot         | UNDR
+Waycrest Manor       | WM
 
 ### TODO
 - [x] Integrate Raider.io
