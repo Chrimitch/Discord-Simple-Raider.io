@@ -7,12 +7,12 @@ A Discord Bot made to return the Raider.io Score of a character in a simple, eas
 * Can respond to arguments passed as flags. Flags include: `-br, -mr, -r, -d, -nl, -a`
 
 ### Commands
-* `-br:` Best run for a character in the current season.
-* `-mr:` Most recent run for a character in the current season.
-* `-r:` Raid progression for the current expansion's tiers.
-* `d [dungeon short_name]` Best run for the given dungeon. Dungeon name must be given as the Raider.io short_name. Short_names are listen below.
-* `-nl:` Removes the Raider.io character link from the bot response.
-* `-a:` This does `-br -mr -r` in a single argument. `-d` and `-nl` can be used with it, but using `-br`, `-mr`, or `-r` does nothing.
+* `-br` Best run for a character in the current season.
+* `-mr` Most recent run for a character in the current season.
+* `-r` Raid progression for the current expansion's tiers.
+* `-d [dungeon short_name]` Best run for the given dungeon. Dungeon name must be given as the Raider.io short_name. Short_names are listen below.
+* `-nl` Removes the Raider.io character link from the bot response.
+* `-a` This does `-br -mr -r` in a single argument. `-d` and `-nl` can be used with it, but using `-br`, `-mr`, or `-r` does nothing.
 
 ### Libraries
 * [Node.js request 2.88.0](https://www.npmjs.com/package/request)
@@ -24,24 +24,24 @@ A Discord Bot made to return the Raider.io Score of a character in a simple, eas
 
 ### How to use
 * `r.io [region]/[server]/[character]` is the default call for the bot.
-* Multiple flags can be used in conjunction, but -d must be followed by a dungeon regardless. Order does not matter.
+* Multiple flags can be used in conjunction, but -d must be followed by a dungeon regardless. The order of flags does not matter.
 
 ### Notes
 * A player's best run is considered their highest scoring run.
 * A player's best run for a dungeon is used through the dungeon's the abbreviation from Raider.io (ex. sots or kr; case does not matter).
 * Short names:
-  * Dungeon Name         | Short_name
-    ---------------------|------------
-    Atal'dazar           | AD
-    Freehold             | FH
-    King's Rest          | KR
-    The Motherlode!!     | ML
-    Shrine of the Storms | SOTS
-    Siege of Boralus     | SIEGE
-    Temple of Sethraliss | TOS
-    Tol Dagor            | TD
-    The Underrot         | UNDR
-    Waycrest Manor       | WM
+  Dungeon Name         | Short_name
+  ---------------------|------------
+  Atal'dazar           | AD
+  Freehold             | FH
+  King's Rest          | KR
+  The Motherlode!!     | ML
+  Shrine of the Storms | SOTS
+  Siege of Boralus     | SIEGE
+  Temple of Sethraliss | TOS
+  Tol Dagor            | TD
+  The Underrot         | UNDR
+  Waycrest Manor       | WM
 
 ### TODO
 - [x] Integrate Raider.io
