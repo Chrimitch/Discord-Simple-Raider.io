@@ -25,6 +25,7 @@ A Discord Bot made to return the Raider.io Score of a character in a simple, eas
 ### How to use
 * `r.io [region]/[server]/[character]` is the default call for the bot.
 * Multiple flags can be used in conjunction, but -d must be followed by a dungeon regardless. The order of flags does not matter.
+* Use [this link](https://discordapp.com/oauth2/authorize?&client_id=530535106365095947&scope=bot&permissions=8) to invite him to your server. It's currently running on a Raspberry Pi 3B.
 
 ### Notes
 * A player's best run is considered their highest scoring run.
