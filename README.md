@@ -11,20 +11,22 @@ A Discord Bot made to return the Raider.io Score of a character in a simple, eas
 * `-mr` Most recent run for a character in the current season.
 * `-r` Raid progression for the current expansion's tiers.
 * `-d [dungeon short_name]` Best run for the given dungeon. Dungeon name must be given as the Raider.io short_name. Short_names are listen below.
-* `-nl` Removes the Raider.io character link from the bot response.
-* `-a` This does `-br -mr -r` in a single argument. `-d` and `-nl` can be used with it, but using `-br`, `-mr`, or `-r` does nothing.
+* `-g` Gives the item level for the requested character.
+* `-a` This does `-br -mr -r -g` in a single argument. `-d` can be used with it, but using `-br`, `-mr`, `-g`, or `-r` does nothing.
+* `-af` This reports the affixes for the current week. This one is special and doesn't work with the standard `r.io` call. Must be separate as `r.io -af`.
+* `-help` This sends a help message to the user requesting help.
 
 ### Libraries
 * [Node.js request 2.88.0](https://www.npmjs.com/package/request)
 * [Raider.io API](https://raider.io/api/)
 
 ### Installation
-* Clone the repo using your preferred method (otherwise `git clone https://github.com/Chrimitch/Discord-Simple-Raider.io`).
+* Clone the repo using your preferred method (otherwise `git clone https://github.com/Chrimitch/Discord-Simple-Raider.io.git`).
 * Follow [this guide](https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/) on how to create a Discord Bot and invite it to your server.
 
 ### How to use
 * `r.io [region]/[server]/[character]` is the default call for the bot.
-* Multiple flags can be used in conjunction, but -d must be followed by a dungeon regardless. The order of flags does not matter.
+* Multiple flags can be used in conjunction, but -d must be followed by a dungeon regardless. The order of flags does not matter. See Commands for more details.
 * Use [this link](https://discordapp.com/oauth2/authorize?&client_id=530535106365095947&scope=bot&permissions=8) to invite him to your server. It's currently running on a Raspberry Pi 3B.
 
 ### Notes
@@ -52,3 +54,7 @@ A Discord Bot made to return the Raider.io Score of a character in a simple, eas
 - [x] r.io [region]/[server]/[character] -d [dungeon] //best for dungeon
 - [x] r.io [region]/[server]/[character] -r //raid progress
 - [x] r.io [region]/[server]/[character] -a //list all pertinent information (io score, raid progress, best run, most recent run)
+- [x] r.io [region]/[server]/[character] -g //ilvl
+- [x] r.io -af //affixes for current week
+- [x] r.io -help //send help message to user requesting help
+- [] r.io -channel //set a r.io only channel
