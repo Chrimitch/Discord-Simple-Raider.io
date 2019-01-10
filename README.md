@@ -14,6 +14,7 @@ A Discord Bot made to return the Raider.io Score of a character in a simple, eas
 * `-g` Gives the item level for the requested character.
 * `-a` This does `-br -mr -r -g` in a single argument. `-d` can be used with it, but using `-br`, `-mr`, `-g`, or `-r` does nothing.
 * `-af` This reports the affixes for the current week. This one is special and doesn't work with the standard `r.io` call. Must be separate as `r.io -af`.
+* `-F` Pay respects. This is case sensitive and must be separate like `-af`.
 * `-help` This sends a help message to the user requesting help.
 
 ### Libraries
@@ -57,4 +58,5 @@ A Discord Bot made to return the Raider.io Score of a character in a simple, eas
 - [x] r.io [region]/[server]/[character] -g //ilvl
 - [x] r.io -af //affixes for current week
 - [x] r.io -help //send help message to user requesting help
+- [x] r.io -F //gotta pay respects
 - [] r.io -channel //set a r.io only channel

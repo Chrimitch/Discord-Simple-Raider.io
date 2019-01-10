@@ -1,7 +1,7 @@
 var Discord   = require('discord.io');
 var DiscordJS = require('discord.js');
 var logger    = require('winston');
-var auth      = require('./auth.json');
+var auth      = require('./discord_files/auth.json');
 var request   = require('request');
 
 // Globals.
@@ -68,9 +68,7 @@ var bot = new Discord.Client({
 });
 bot.on('ready', function (evt)
 {
-  logger.info('Connected');
-  logger.info('Logged in as: ');
-  logger.info(bot.username + ' - (' + bot.id + ')');
+  logger.info('Bot\'s doing the thing!~');
 });
 
 bot.on('message', function (user, userID, channelID, message, evt) {
@@ -86,13 +84,27 @@ bot.on('message', function (user, userID, channelID, message, evt) {
     var args = message.split(' ');
 
     // Check format of input string. If valid, move on, else return and alert.
-    var char_regex = new RegExp('^(us|eu)\/[a-zA-Z0-9\-\'\u00C9\u00E9]+\/[a-zA-Z\u00DF-\u0111]+$', "i")
+    var char_regex = new RegExp('^(us|eu)\/[a-zA-Z0-9\-\'\u00C9\u00E9]+\/[a-zA-Z\u00DF-\u0111]+$', 'i')
     if(char_regex.test(args[1])) {
       // Break up the character arguments.
       var char_args  = args[1].split('/');
       var region     = char_args[0];
       var server     = char_args[1];
       var name       = char_args[2];
+      var franco_regex = new RegExp('^(xëno)$', 'i');
+      var tyler_regex  = new RegExp('^(isuldien)$', 'i');
+      if(franco_regex.test(name)) {
+        bot.sendMessage({
+          to: channelID,
+          message: '<@240584908039389188> is shit anyway, why bother?'
+        });
+      }
+      if(tyler_regex.test(name)) {
+        bot.sendMessage({
+          to: channelID,
+          message: '<@300463437400637443>, fuck you and Darf.'
+        });
+      }
 
       // If args length > 2, get and validate flags (dungeon as well if there).
       if(args.length > 2) {
@@ -219,13 +231,12 @@ bot.on('message', function (user, userID, channelID, message, evt) {
     }
     else if(args[1].toLowerCase() === '-af') {
       flags.push('-af');
-      console.log(region);
       var io_promise = get_io_info('def', 'def', 'def', flags);
 
       io_promise.then(
         function(result) {
           var io_data = result;
-          embed.setTitle('Weekly Affixes for ' + region.toUpperCase());
+          embed.setTitle('Weekly Affixes');
           embed.setColor('BLUE');
           var desc = ''
           var affixes = io_data.affix_details;
@@ -262,7 +273,9 @@ bot.on('message', function (user, userID, channelID, message, evt) {
 -r  | Raid progression
 -g  | Item Level
 -a  | -br -mr -r -g together
--af | Current affixes\`\`\`` + 'See https://github.com/Chrimitch/Discord-Simple-Raider.io for more detailed help');
+-af | Current affixes
+-F  | Gotta pay respects
+-c  | Set the channel\`\`\`` + 'See https://github.com/Chrimitch/Discord-Simple-Raider.io for more detailed help');
       bot.sendMessage({
         to: userID,
         message: '',
@@ -275,16 +288,15 @@ bot.on('message', function (user, userID, channelID, message, evt) {
         embed: embed
       });
     }
-    else {
-      embed.setTitle('Error');
-      embed.setDescription('Invalid format.');
-      embed.setColor('RED');
+    else if(args[1] === '-F') {
+      embed.setTitle('Paying Respect');
+      embed.setDescription('F.');
+      embed.setColor('BROWN');
       bot.sendMessage({
         to: channelID,
         message: '',
         embed: embed
       });
-      return;
     }
   }
 });
