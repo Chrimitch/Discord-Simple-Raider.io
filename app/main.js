@@ -167,22 +167,24 @@ bot.on('message', function (user, userID, channelID, message, evt) {
               embed.setColor('ORANGE');
               embed.setURL(io_data.profile_url);
               if(flags.includes('-a')) { embed.addField('Gear ilvl', 'ilvl is ' + io_data.gear.item_level_equipped + ' (' + io_data.gear.item_level_total + ')');
-                                         embed.addField('Best Run', io_data.mythic_plus_best_runs[0].dungeon + ' (' + io_data.mythic_plus_best_runs[0].short_name + ') +' + io_data.mythic_plus_best_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_best_runs[0].score);
-                                         embed.addField('Most Recent Run', io_data.mythic_plus_recent_runs[0].dungeon + ' (' + io_data.mythic_plus_recent_runs[0].short_name + ') +' + io_data.mythic_plus_recent_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_recent_runs[0].score);
+                                         if(io_data.mythic_plus_best_runs.length > 0)   { embed.addField('Best Run', io_data.mythic_plus_best_runs[0].dungeon + ' (' + io_data.mythic_plus_best_runs[0].short_name + ') +' + io_data.mythic_plus_best_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_best_runs[0].score); } else { embed.addField('Best Run', 'N/A'); }
+                                         if(io_data.mythic_plus_recent_runs.length > 0) { embed.addField('Most Recent Run', io_data.mythic_plus_recent_runs[0].dungeon + ' (' + io_data.mythic_plus_recent_runs[0].short_name + ') +' + io_data.mythic_plus_recent_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_recent_runs[0].score); } else { embed.addField('Most Recent Run', 'N/A'); }
                                          embed.addField('Raid Progression', 'Uldir: ' + io_data.raid_progression.uldir.normal_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'N, ' + io_data.raid_progression.uldir.heroic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'H, ' + io_data.raid_progression.uldir.mythic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses + 'M.'); }
               else {
-                if(flags.includes('-br')) { embed.addField('Best Run', io_data.mythic_plus_best_runs[0].dungeon + ' (' + io_data.mythic_plus_best_runs[0].short_name + ') +' + io_data.mythic_plus_best_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_best_runs[0].score); }
-                if(flags.includes('-mr')) { embed.addField('Most Recent Run', io_data.mythic_plus_recent_runs[0].dungeon + ' (' + io_data.mythic_plus_recent_runs[0].short_name + ') +' + io_data.mythic_plus_recent_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_recent_runs[0].score); }
+                if(flags.includes('-br')) { if(io_data.mythic_plus_best_runs.length > 0)   { embed.addField('Best Run', io_data.mythic_plus_best_runs[0].dungeon + ' (' + io_data.mythic_plus_best_runs[0].short_name + ') +' + io_data.mythic_plus_best_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_best_runs[0].score); } else { embed.addField('Best Run', 'N/A'); } }
+                if(flags.includes('-mr')) { if(io_data.mythic_plus_recent_runs.length > 0) { embed.addField('Most Recent Run', io_data.mythic_plus_recent_runs[0].dungeon + ' (' + io_data.mythic_plus_recent_runs[0].short_name + ') +' + io_data.mythic_plus_recent_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_recent_runs[0].score); } else { embed.addField('Most Recent Run', 'N/A'); } }
                 if(flags.includes('-r'))  { embed.addField('Raid Progression', 'Uldir: ' + io_data.raid_progression.uldir.normal_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'N, ' + io_data.raid_progression.uldir.heroic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'H, ' + io_data.raid_progression.uldir.mythic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses + 'M.'); }
-                if(flags.includes('-g'))  {embed.addField('Gear ilvl', 'ilvl is ' + io_data.gear.item_level_equipped + ' (' + io_data.gear.item_level_total + ')'); }
+                if(flags.includes('-g'))  { embed.addField('Gear ilvl', 'ilvl is ' + io_data.gear.item_level_equipped + ' (' + io_data.gear.item_level_total + ')'); }
               }
               if(flags.includes('-d'))  {
                 // Loop through mythic_plus_best_runs array to find matching dungeon
-                io_data.mythic_plus_best_runs.every( function(el, i) {
-                  if(el.short_name === dungeon) { embed.addField('Best Run in ' + el.dungeon + ' (' + el.short_name + ')', '+' + el.mythic_level + ' scoring ' + el.score + '.'); dungeon_flag = false; return false; }
-                  else { return true; }
-                });
-                if(dungeon_flag == true) { embed.addField('Best Run in ' + el.dungeon + ' (' + el.short_name + ')', io_data.name + ' has not completed a key for this dungeon in the current season.'); }
+                if(io_data.mythic_plus_best_runs.length > 0) {
+                  io_data.mythic_plus_best_runs.every( function(el, i) {
+                    if(el.short_name === dungeon) { embed.addField('Best Run in (' + el.short_name + ')', '+' + el.mythic_level + ' scoring ' + el.score + '.'); dungeon_flag = false; return false; }
+                    else { return true; }
+                  });
+                }
+                else if(dungeon_flag == true) { embed.addField('Best run in ' + dungeon.toUpperCase(), io_data.name + ' has not completed a key in this dungeon this season.'); }
               }
 
               bot.sendMessage({
