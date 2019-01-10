@@ -204,7 +204,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
           });
           break;
         case 1:
-          console.log('Error on server: ' + character);
+          console.log('Error on server: ' + args[1]);
           embed.setTitle('Error');
           embed.setDescription('Couldn\'t find that server. Try again.');
           embed.setColor('RED');
@@ -215,7 +215,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
           });
           break;
         case -1:
-          console.log('Error on region: ' + character);
+          console.log('Error on region: ' + args[1]);
           embed.setTitle('Error');
           embed.setDescription('Region does not exist.');
           embed.setColor('RED');
