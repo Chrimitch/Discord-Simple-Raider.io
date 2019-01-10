@@ -1,7 +1,7 @@
 var Discord   = require('discord.io');
 var DiscordJS = require('discord.js');
 var logger    = require('winston');
-var auth      = require('./auth.json');
+var auth      = require('./discord_files/auth.json');
 var request   = require('request');
 
 // Globals.
@@ -47,7 +47,7 @@ var eu_servers      = [
   "Trollbane","Turalyon","TwilightsHammer","TwistingNether","Tyrande","Uldaman","Ulduar","Uldum","UnGoro","Varimathras","Vashj","Veklor","Veknilash","Voljin","Wildhammer",
   "Wrathbringer","Xavius","Ysera","Ysondre","Zenedar","ZirkeldesCenarius","Zuljin","Zuluhed","MarecagedeZangar","Chantseternels"
 ];
-var valid_flags     = ['-br','-mr','-r','-d','-a'];
+var valid_flags     = ['-br','-mr','-r','-d','-a','-g'];
 var bfa_dungeons    = ['wm','fh','siege','sots','td','ml','undr','kr','tos','ad'];
 var us_server_regex = new RegExp(us_servers.join("|"), "i");
 var eu_server_regex = new RegExp(eu_servers.join("|"), "i");
@@ -68,9 +68,7 @@ var bot = new Discord.Client({
 });
 bot.on('ready', function (evt)
 {
-  logger.info('Connected');
-  logger.info('Logged in as: ');
-  logger.info(bot.username + ' - (' + bot.id + ')');
+  logger.info('Bot\'s doing the thing!~');
 });
 
 bot.on('message', function (user, userID, channelID, message, evt) {
@@ -79,132 +77,226 @@ bot.on('message', function (user, userID, channelID, message, evt) {
     var flags        = [];    // Flags for passable arguments.
     var dungeon      = 'def'; // Default value for dungeon.
     var dungeon_flag = true;  // If the user hasn't done a key for this dungeon in the current season.
-    const embed      = new DiscordJS.RichEmbed();
+    const embed      = new DiscordJS.RichEmbed().setFooter('R.io - Raider.io for Discord');
+    const help_embed = new DiscordJS.RichEmbed().setFooter('R.io - Raider.io for Discord');
 
     // Split arguemts on spaces.
-    var args       = message.split(' ');
-    var character  = args[1];
+    var args = message.split(' ');
 
     // Check format of input string. If valid, move on, else return and alert.
-    var char_regex = new RegExp('^(us|eu)\/[a-zA-Z0-9\-\'\u00C9\u00E9]+\/[a-zA-Z\u00DF-\u0111]+$', "i")
-    if(!char_regex.test(character)) {
-      embed.setTitle('Error');
-      embed.setDescription('Invalid format.');
-      embed.setColor('RED');
-      bot.sendMessage({
-        to: channelID,
-        message: '',
-        embed: embed
-      });
-      return;
-    }
-
-    // Break up the character arguments.
-    var char_args  = character.split('/');
-    var region     = char_args[0];
-    var server     = char_args[1];
-    var name       = char_args[2];
-
-    // If args length > 2, get and validate flags (dungeon as well if there).
-    if(args.length > 2) {
-      for(i=2;i<args.length;i++) {
-        if(args[i] === '-d' || args[i] === '-D') {
-          flags.push(args[i].toLowerCase());
-          dungeon = args[i+1].toUpperCase();
-          if(validate_dungeon(dungeon) == 1) {
-            bot.sendMessage({
-              to: channelID,
-              message: `Invalid dungeon.`
-            });
-            return;
-          }
-          i+=1;
-        }
-        else {
-          flags.push(args[i].toLowerCase());
-        }
-      }
-      if(validate_flags(flags) == 1) {
+    var char_regex = new RegExp('^(us|eu)\/[a-zA-Z0-9\-\'\u00C9\u00E9]+\/[a-zA-Z\u00DF-\u0111]+$', 'i')
+    if(char_regex.test(args[1])) {
+      // Break up the character arguments.
+      var char_args  = args[1].split('/');
+      var region     = char_args[0];
+      var server     = char_args[1];
+      var name       = char_args[2];
+      var franco_regex = new RegExp('^(xëno)$', 'i');
+      var tyler_regex  = new RegExp('^(isuldien)$', 'i');
+      if(franco_regex.test(name)) {
         bot.sendMessage({
           to: channelID,
-          message: `Invalid flag(s).`
+          message: '<@240584908039389188> is shit anyway, why bother?'
         });
-        return;
       }
-    }
+      if(tyler_regex.test(name)) {
+        bot.sendMessage({
+          to: channelID,
+          message: '<@300463437400637443>, fuck you and Darf.'
+        });
+      }
 
-    switch(compare_region_server(region, server)) {
-      case 0:
-        var io_promise = get_io_info(region, server, name, flags);
-
-        io_promise.then(
-          function(result) {
-            var io_data = result;
-            // console.log(io_data);
-            embed.setTitle(io_data.name + ' - Raider.io');
-            embed.setDescription(io_data.name + '\'s score is ' + io_data.mythic_plus_scores.all);
-            embed.setThumbnail(io_data.thumbnail_url);
-            embed.setColor('ORANGE');
-            embed.setURL(io_data.profile_url);
-            embed.setFooter('R.io - Raider.io for Discord');
-            if(flags.includes('-a')) { embed.addField('Best Run', io_data.mythic_plus_best_runs[0].dungeon + ' (' + io_data.mythic_plus_best_runs[0].short_name + ') +' + io_data.mythic_plus_best_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_best_runs[0].score);
-                                       embed.addField('Most Recent Run', io_data.mythic_plus_recent_runs[0].dungeon + ' (' + io_data.mythic_plus_recent_runs[0].short_name + ') +' + io_data.mythic_plus_recent_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_recent_runs[0].score);
-                                       embed.addField('Raid Progression', 'Uldir: ' + io_data.raid_progression.uldir.normal_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'N, ' + io_data.raid_progression.uldir.heroic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'H, ' + io_data.raid_progression.uldir.mythic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses + 'M.'); }
-            else {
-              if(flags.includes('-br')) { embed.addField('Best Run', io_data.mythic_plus_best_runs[0].dungeon + ' (' + io_data.mythic_plus_best_runs[0].short_name + ') +' + io_data.mythic_plus_best_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_best_runs[0].score); }
-              if(flags.includes('-mr')) { embed.addField('Most Recent Run', io_data.mythic_plus_recent_runs[0].dungeon + ' (' + io_data.mythic_plus_recent_runs[0].short_name + ') +' + io_data.mythic_plus_recent_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_recent_runs[0].score); }
-              if(flags.includes('-r'))  { embed.addField('Raid Progression', 'Uldir: ' + io_data.raid_progression.uldir.normal_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'N, ' + io_data.raid_progression.uldir.heroic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'H, ' + io_data.raid_progression.uldir.mythic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses + 'M.'); }
-            }
-            if(flags.includes('-d'))  {
-              // Loop through mythic_plus_best_runs array to find matching dungeon
-              io_data.mythic_plus_best_runs.every( function(el, i) {
-                if(el.short_name === dungeon) { embed.addField('Best Run in ' + el.dungeon + ' (' + el.short_name + ')', '+' + el.mythic_level + ' scoring ' + el.score + '.'); dungeon_flag = false; return false; }
-                else { return true; }
+      // If args length > 2, get and validate flags (dungeon as well if there).
+      if(args.length > 2) {
+        for(i=2;i<args.length;i++) {
+          if(args[i].toLowerCase() === '-d') {
+            flags.push(args[i].toLowerCase());
+            dungeon = args[i+1].toUpperCase();
+            if(validate_dungeon(dungeon) == 1) {
+              embed.setTitle('Error');
+              embed.setDescription('Invalid dungeon short name.');
+              embed.setColor('RED');
+              bot.sendMessage({
+                to: channelID,
+                message: '',
+                embed: embed
               });
-              if(dungeon_flag == true) { embed.addField('Best Run in ' + el.dungeon + ' (' + el.short_name + ')', io_data.name + ' has not completed a key for this dungeon in the current season.'); }
+              return;
             }
-
-            bot.sendMessage({
-              to: channelID,
-              message: '',
-              embed: embed
-            });
-        }, function(error) {
-            console.log(error);
+            i+=1;
+          }
+          else if(args[i].toLowerCase() === '-af') {
             embed.setTitle('Error');
-            embed.setDescription('Couldn\'t find that character. Double check spelling.');
+            embed.setDescription('Affix flag must be used alone without a character call.');
             embed.setColor('RED');
             bot.sendMessage({
               to: channelID,
               message: '',
               embed: embed
             });
-        })
-        break;
-      case 1:
-        console.log('Error on server: ' + character);
-        embed.setTitle('Error');
-        embed.setDescription('Couldn\'t find that server. Try again.');
-        embed.setColor('RED');
-        bot.sendMessage({
-          to: channelID,
-          message: '',
-          embed: embed
-        });
-        break;
-      case -1:
-        console.log('Error on region: ' + character);
-        embed.setTitle('Error');
-        embed.setDescription('Region does not exist.');
-        embed.setColor('RED');
-        bot.sendMessage({
-          to: channelID,
-          message: '',
-          embed: embed
-        });
-        break;
-      default:
-        break;
+            return;
+          }
+          else {
+            flags.push(args[i].toLowerCase());
+          }
+        }
+        if(validate_flags(flags) == 1) {
+          embed.setTitle('Error');
+          embed.setDescription('There was an invalid flag.');
+          embed.setColor('RED');
+          bot.sendMessage({
+            to: channelID,
+            message: '',
+            embed: embed
+          });
+          return;
+        }
+      }
+
+      switch(compare_region_server(region, server)) {
+        case 0:
+          var io_promise = get_io_info(region, server, name, flags);
+
+          io_promise.then(
+            function(result) {
+              var io_data = result;
+              // console.log(io_data);
+              embed.setTitle(io_data.name + ' - Raider.io');
+              embed.setDescription(io_data.name + '\'s score is ' + io_data.mythic_plus_scores.all);
+              embed.setThumbnail(io_data.thumbnail_url);
+              embed.setColor('ORANGE');
+              embed.setURL(io_data.profile_url);
+              if(flags.includes('-a')) { embed.addField('Gear ilvl', 'ilvl is ' + io_data.gear.item_level_equipped + ' (' + io_data.gear.item_level_total + ')');
+                                         embed.addField('Best Run', io_data.mythic_plus_best_runs[0].dungeon + ' (' + io_data.mythic_plus_best_runs[0].short_name + ') +' + io_data.mythic_plus_best_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_best_runs[0].score);
+                                         embed.addField('Most Recent Run', io_data.mythic_plus_recent_runs[0].dungeon + ' (' + io_data.mythic_plus_recent_runs[0].short_name + ') +' + io_data.mythic_plus_recent_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_recent_runs[0].score);
+                                         embed.addField('Raid Progression', 'Uldir: ' + io_data.raid_progression.uldir.normal_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'N, ' + io_data.raid_progression.uldir.heroic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'H, ' + io_data.raid_progression.uldir.mythic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses + 'M.'); }
+              else {
+                if(flags.includes('-br')) { embed.addField('Best Run', io_data.mythic_plus_best_runs[0].dungeon + ' (' + io_data.mythic_plus_best_runs[0].short_name + ') +' + io_data.mythic_plus_best_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_best_runs[0].score); }
+                if(flags.includes('-mr')) { embed.addField('Most Recent Run', io_data.mythic_plus_recent_runs[0].dungeon + ' (' + io_data.mythic_plus_recent_runs[0].short_name + ') +' + io_data.mythic_plus_recent_runs[0].mythic_level + ' scoring ' + io_data.mythic_plus_recent_runs[0].score); }
+                if(flags.includes('-r'))  { embed.addField('Raid Progression', 'Uldir: ' + io_data.raid_progression.uldir.normal_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'N, ' + io_data.raid_progression.uldir.heroic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses +'H, ' + io_data.raid_progression.uldir.mythic_bosses_killed + '/' + io_data.raid_progression.uldir.total_bosses + 'M.'); }
+                if(flags.includes('-g'))  {embed.addField('Gear ilvl', 'ilvl is ' + io_data.gear.item_level_equipped + ' (' + io_data.gear.item_level_total + ')'); }
+              }
+              if(flags.includes('-d'))  {
+                // Loop through mythic_plus_best_runs array to find matching dungeon
+                io_data.mythic_plus_best_runs.every( function(el, i) {
+                  if(el.short_name === dungeon) { embed.addField('Best Run in ' + el.dungeon + ' (' + el.short_name + ')', '+' + el.mythic_level + ' scoring ' + el.score + '.'); dungeon_flag = false; return false; }
+                  else { return true; }
+                });
+                if(dungeon_flag == true) { embed.addField('Best Run in ' + el.dungeon + ' (' + el.short_name + ')', io_data.name + ' has not completed a key for this dungeon in the current season.'); }
+              }
+
+              bot.sendMessage({
+                to: channelID,
+                message: '',
+                embed: embed
+              });
+            },
+            function(error) {
+              console.log(error);
+              embed.setTitle('Error');
+              embed.setDescription('Error getting the data from Raider.io. Try again.');
+              embed.setColor('RED');
+              bot.sendMessage({
+                to: channelID,
+                message: '',
+                embed: embed
+              });
+          });
+          break;
+        case 1:
+          console.log('Error on server: ' + character);
+          embed.setTitle('Error');
+          embed.setDescription('Couldn\'t find that server. Try again.');
+          embed.setColor('RED');
+          bot.sendMessage({
+            to: channelID,
+            message: '',
+            embed: embed
+          });
+          break;
+        case -1:
+          console.log('Error on region: ' + character);
+          embed.setTitle('Error');
+          embed.setDescription('Region does not exist.');
+          embed.setColor('RED');
+          bot.sendMessage({
+            to: channelID,
+            message: '',
+            embed: embed
+          });
+          break;
+        default:
+          break;
+      }
+    }
+    else if(args[1].toLowerCase() === '-af') {
+      flags.push('-af');
+      var io_promise = get_io_info('def', 'def', 'def', flags);
+
+      io_promise.then(
+        function(result) {
+          var io_data = result;
+          embed.setTitle('Weekly Affixes');
+          embed.setColor('BLUE');
+          var desc = ''
+          var affixes = io_data.affix_details;
+
+          affixes.forEach( function(el) {
+            desc += '[' + el.name + ']' + '(' + el.wowhead_url + ') '
+          });
+
+          embed.setDescription(desc);
+          bot.sendMessage({
+            to: channelID,
+            message: '',
+            embed: embed
+          });
+        },
+        function(error) {
+          console.log(error);
+          embed.setTitle('Error');
+          embed.setDescription('Error getting the data from Raider.io. Try again.');
+          embed.setColor('RED');
+          bot.sendMessage({
+            to: channelID,
+            message: '',
+            embed: embed
+          });
+      });
+    }
+    else if(args[1].toLowerCase() === '-help') {
+      embed.setTitle('R.io - Help');
+      help_embed.setTitle('R.io - Help');
+      help_embed.setDescription(`\`\`\`
+-br | Best run
+-mr | Most recent
+-r  | Raid progression
+-g  | Item Level
+-a  | -br -mr -r -g together
+-af | Current affixes
+-F  | Gotta pay respects
+-c  | Set the channel\`\`\`` + 'See https://github.com/Chrimitch/Discord-Simple-Raider.io for more detailed help');
+      bot.sendMessage({
+        to: userID,
+        message: '',
+        embed: help_embed
+      });
+      embed.setDescription('Message sent to ' + user);
+      bot.sendMessage({
+        to: channelID,
+        message: '',
+        embed: embed
+      });
+    }
+    else if(args[1] === '-F') {
+      embed.setTitle('Paying Respect');
+      embed.setDescription('F.');
+      embed.setColor('BROWN');
+      bot.sendMessage({
+        to: channelID,
+        message: '',
+        embed: embed
+      });
     }
   }
 });
@@ -254,17 +346,19 @@ function validate_dungeon(dungeon) {
 
 /*
   Get Raider.io JSON data from Raider.io given a character's region, server, and name.
-  ['-br','-mr','-r','-d','-a']
+  ['-br','-mr','-r','-d','-a','-af','-g']
 */
 function get_io_info(region, server, name, flags) {
   var address = 'https://raider.io/api/v1/characters/profile?region='+region+'&realm='+server+'&name='+name+'&fields=mythic_plus_scores';
-  if(flags.includes('-a')) { address += ',mythic_plus_best_runs:all,mythic_plus_recent_runs,raid_progression'; }
+  if(flags.includes('-a')) { address += ',mythic_plus_best_runs:all,mythic_plus_recent_runs,raid_progression,gear'; }
+  else if(flags.includes('-af') && flags.length == 1) { address = 'https://raider.io/api/v1/mythic-plus/affixes?region=us&locale=en'; }
   else {
     if(flags.includes('-br') && flags.includes('-d')) { address += ',mythic_plus_best_runs:all'; }
     else if(flags.includes('-d'))                     { address += ',mythic_plus_best_runs:all'; }
     else if(flags.includes('-br'))                    { address += ',mythic_plus_best_runs'; }
     if(flags.includes('-mr'))                         { address += ',mythic_plus_recent_runs'; }
     if(flags.includes('-r'))                          { address += ',raid_progression'; }
+    if(flags.includes('-g'))                          { address += ',gear'; }
   }
   return new Promise(function(resolve, reject) {
     request(address, function (error, response, body) {
