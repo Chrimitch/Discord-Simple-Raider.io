@@ -84,27 +84,27 @@ bot.on('message', function (user, userID, channelID, message, evt) {
     var args = message.split(' ');
 
     // Check format of input string. If valid, move on, else return and alert.
-    var char_regex = new RegExp('^(us|eu)\/[a-zA-Z0-9\-\'\u00C9\u00E9]+\/[a-zA-Z\u00DF-\u0111]+$', 'i')
+    var char_regex = new RegExp('^(us|eu)\/[a-zA-Z0-9\-\'\u00C9\u00E9]+\/[a-zA-Z\u00C0-\u017F]+$', 'i')
     if(char_regex.test(args[1])) {
       // Break up the character arguments.
       var char_args  = args[1].split('/');
       var region     = char_args[0];
       var server     = char_args[1];
       var name       = char_args[2];
-      var franco_regex = new RegExp('^(xëno)$', 'i');
-      var tyler_regex  = new RegExp('^(isuldien)$', 'i');
-      if(franco_regex.test(name)) {
-        bot.sendMessage({
-          to: channelID,
-          message: '<@240584908039389188> is shit anyway, why bother?'
-        });
-      }
-      if(tyler_regex.test(name)) {
-        bot.sendMessage({
-          to: channelID,
-          message: '<@300463437400637443>, fuck you and Darf.'
-        });
-      }
+      // var franco_regex = new RegExp('^(xëno)$', 'i');
+      // var tyler_regex  = new RegExp('^(isuldien)$', 'i');
+      // if(franco_regex.test(name)) {
+      //   bot.sendMessage({
+      //     to: channelID,
+      //     message: '<@240584908039389188> is shit anyway, why bother?'
+      //   });
+      // }
+      // if(tyler_regex.test(name)) {
+      //   bot.sendMessage({
+      //     to: channelID,
+      //     message: '<@300463437400637443>, fuck you and Darf.'
+      //   });
+      // }
 
       // If args length > 2, get and validate flags (dungeon as well if there).
       if(args.length > 2) {
