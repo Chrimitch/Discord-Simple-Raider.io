@@ -13,7 +13,7 @@ A Discord Bot made to return the Raider.io Score of a character in a simple, eas
 * `-d [dungeon short_name]` Best run for the given dungeon. Dungeon name must be given as the Raider.io short_name. Short_names are listen below.
 * `-g` Gives the item level for the requested character.
 * `-a` This does `-br -mr -r -g` in a single argument. `-d` can be used with it, but using `-br`, `-mr`, `-g`, or `-r` does nothing.
-* `-af` This reports the affixes for the current week. This one is special and doesn't work with the standard `r.io` call. Must be separate as `r.io -af`.
+* `-af [1-7]` This reports the affixes for the current week and/or 1-7 next weeks. Must be separate as `r.io -af [1-7]`. (The pattern is based off [this rotation](https://www.wowhead.com/mythic-keystones-and-dungeons-guide#affix-rotation) from WoWHead.)
 * `-F` Pay respects. This is case sensitive and must be separate like `-af`.
 * `-help` This sends a help message to the user requesting help.
 
@@ -56,7 +56,7 @@ A Discord Bot made to return the Raider.io Score of a character in a simple, eas
 - [x] r.io [region]/[server]/[character] -r //raid progress
 - [x] r.io [region]/[server]/[character] -a //list all pertinent information (io score, raid progress, best run, most recent run)
 - [x] r.io [region]/[server]/[character] -g //ilvl
-- [x] r.io -af //affixes for current week
+- [x] r.io -af [1-7] //affixes for current week and/or next 1-7 weeks
 - [x] r.io -help //send help message to user requesting help
 - [x] r.io -F //gotta pay respects
 - [] r.io -channel //set a r.io only channel
