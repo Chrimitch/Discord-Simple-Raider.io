@@ -49,6 +49,31 @@ var eu_servers      = [
 ];
 var valid_flags     = ['-br','-mr','-r','-d','-a','-g'];
 var bfa_dungeons    = ['wm','fh','siege','sots','td','ml','undr','kr','tos','ad'];
+var affixes         = [
+{'name':'Fortified Sanguine Necrotic',
+ 'desc':'`|-`[Fortified](https://www.wowhead.com/affix=10/fortified)`-|-`[Sanguine](https://www.wowhead.com/affix=8/sanguine)`|-`[Necrotic](https://www.wowhead.com/affix=4/necrotic)`|`'},
+{'name':'Tyrannical Bursting Skittish',
+ 'desc':'`|`[Tyrannical](https://www.wowhead.com/affix=9/tyrannical)`|-`[Bursting](https://www.wowhead.com/affix=11/bursting)`|--`[Skittish](https://www.wowhead.com/affix=2/skittish)`-|`'},
+{'name':'Fortified Teeming Quaking',
+ 'desc':'`|-`[Fortified](https://www.wowhead.com/affix=10/fortified)`-|`[Teeming](https://www.wowhead.com/affix=5/teeming)`|-`[Quaking](https://www.wowhead.com/affix=14/quaking)`-|`'},
+{'name':'Tyrannical	Raging Necrotic',
+ 'desc':'`|`[Tyrannical](https://www.wowhead.com/affix=9/tyrannical)`|--`[Raging](https://www.wowhead.com/affix=6/raging)`-|-`[Necrotic](https://www.wowhead.com/affix=4/necrotic)`-|`'},
+{'name':'Fortified Bolstering Skittish',
+ 'desc':'`|-`[Fortified](https://www.wowhead.com/affix=10/fortified)-`|`[Bolstering](https://www.wowhead.com/affix=7/bolstering)`|--`[Skittish](https://www.wowhead.com/affix=2/skittish)`-|`'},
+{'name':'Tyrannical Teeming Volcanic',
+ 'desc':'`|`[Tyrannical](https://www.wowhead.com/affix=9/tyrannical)`|-`[Teeming](https://www.wowhead.com/affix=5/teeming)`|-`[Volcanic](https://www.wowhead.com/affix=3/volcanic)`|`'},
+{'name':'Fortified Sanguine Grievous',
+ 'desc':'`|-`[Fortified](https://www.wowhead.com/affix=10/fortified)`-|-`[Sanguine](https://www.wowhead.com/affix=8/sanguine)`|-`[Grievous](https://www.wowhead.com/affix=12/grievous)`|`'},
+{'name':'Tyrannical Bolstering Explosive',
+ 'desc':'`|`[Tyrannical](https://www.wowhead.com/affix=9/tyrannical)`|`[Bolstering](https://www.wowhead.com/affix=7/bolstering)`|-`[Explosive](https://www.wowhead.com/affix=13/explosive)`|`'},
+{'name':'Fortified Bursting Quaking',
+ 'desc':'`|-`[Fortified](https://www.wowhead.com/affix=10/fortified)`-|-`[Bursting](https://www.wowhead.com/affix=11/bursting)`-|-`[Quaking](https://www.wowhead.com/affix=14/quaking)`|`'},
+{'name':'Tyrannical Raging Volcanic',
+ 'desc':'`|`[Tyrannical](https://www.wowhead.com/affix=9/tyrannical)`|--`[Raging](https://www.wowhead.com/affix=6/raging)`-|-`[Volcanic](https://www.wowhead.com/affix=3/volcanic)`-|`'},
+{'name':'Fortified Teeming	Explosive',
+ 'desc':'`|-`[Fortified](https://www.wowhead.com/affix=10/fortified)`-|-`[Teeming](https://www.wowhead.com/affix=5/teeming)`|-`[Explosive](https://www.wowhead.com/affix=13/explosive)`|`'},
+{'name':'Tyrannical Bolstering Grievous',
+ 'desc':'`|`[Tyrannical](https://www.wowhead.com/affix=9/tyrannical)`|`[Bolstering](https://www.wowhead.com/affix=7/bolstering)`|-`[Grievous](https://www.wowhead.com/affix=12/grievous)`|`'}];
 var us_server_regex = new RegExp(us_servers.join("|"), "i");
 var eu_server_regex = new RegExp(eu_servers.join("|"), "i");
 var flags_regex     = new RegExp(valid_flags.join("|"), "i");
@@ -232,6 +257,10 @@ bot.on('message', function (user, userID, channelID, message, evt) {
       }
     }
     else if(args[1].toLowerCase() === '-af') {
+      var num_next_weeks = -1;
+      if(args.length === 3) {
+        num_next_weeks = parseInt(args[2]);
+      }
       flags.push('-af');
       var io_promise = get_io_info('def', 'def', 'def', flags);
 
@@ -240,12 +269,21 @@ bot.on('message', function (user, userID, channelID, message, evt) {
           var io_data = result;
           embed.setTitle('Weekly Affixes');
           embed.setColor('BLUE');
-          var desc = ''
-          var affixes = io_data.affix_details;
+          var weekly_affixes = io_data.affix_details[0].name + ' ' + io_data.affix_details[1].name + ' ' + io_data.affix_details[2].name;
+          var desc = '';
+          var key = -1;
 
-          affixes.forEach( function(el) {
-            desc += '[' + el.name + ']' + '(' + el.wowhead_url + ') '
+          desc += '`|----+2----|----+4----|----+7---|--+10---|`';
+
+          affixes.forEach( function(el, i) {
+            if(el.name === weekly_affixes) { key = i; desc += '\n' + el.desc + '[' + io_data.affix_details[3].name + '](' + io_data.affix_details[3].wowhead_url + ')`|` **Current Week**'; }
           });
+
+          if(num_next_weeks != -1 && !isNaN(num_next_weeks) && num_next_weeks < 8 ) {
+            for(i = 1; i <= num_next_weeks; i++) {
+              desc += '\n' + affixes[(key+i)%12].desc + '[' + io_data.affix_details[3].name + '](' + io_data.affix_details[3].wowhead_url + ')`|` In ' + i + ' week(s)';
+            }
+          }
 
           embed.setDescription(desc);
           bot.sendMessage({
