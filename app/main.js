@@ -70,7 +70,7 @@ var affixes         = [
  'desc':'`|-`[Fortified](https://www.wowhead.com/affix=10/fortified)`-|-`[Bursting](https://www.wowhead.com/affix=11/bursting)`-|-`[Quaking](https://www.wowhead.com/affix=14/quaking)`|`'},
 {'name':'Tyrannical Raging Volcanic',
  'desc':'`|`[Tyrannical](https://www.wowhead.com/affix=9/tyrannical)`|--`[Raging](https://www.wowhead.com/affix=6/raging)`-|-`[Volcanic](https://www.wowhead.com/affix=3/volcanic)`-|`'},
-{'name':'Fortified Teeming	Explosive',
+{'name':'Fortified Teeming Explosive',
  'desc':'`|-`[Fortified](https://www.wowhead.com/affix=10/fortified)`-|-`[Teeming](https://www.wowhead.com/affix=5/teeming)`|-`[Explosive](https://www.wowhead.com/affix=13/explosive)`|`'},
 {'name':'Tyrannical Bolstering Grievous',
  'desc':'`|`[Tyrannical](https://www.wowhead.com/affix=9/tyrannical)`|`[Bolstering](https://www.wowhead.com/affix=7/bolstering)`|-`[Grievous](https://www.wowhead.com/affix=12/grievous)`|`'}];
